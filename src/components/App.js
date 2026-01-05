@@ -1,84 +1,152 @@
 import React, { useState } from "react";
 import { Routes, Route, Link, useParams, useNavigate } from "react-router-dom";
-import './../styles/App.css';
+import "./../styles/App.css";
 
+/* ---------- Initial Products (8 items mandatory) ---------- */
 const initialProducts = [
-  { id: 1, name: "iPhone 14", price: 70000, description: "Apple phone", image: "https://via.placeholder.com/150" },
-  { id: 2, name: "Samsung S23", price: 65000, description: "Samsung flagship", image: "https://via.placeholder.com/150" },
-  { id: 3, name: "OnePlus 11", price: 60000, description: "Fast phone", image: "https://via.placeholder.com/150" },
-  { id: 4, name: "Pixel 7", price: 58000, description: "Google phone", image: "https://via.placeholder.com/150" },
-  { id: 5, name: "Xiaomi 13", price: 50000, description: "Value phone", image: "https://via.placeholder.com/150" },
-  { id: 6, name: "Vivo X90", price: 52000, description: "Camera phone", image: "https://via.placeholder.com/150" },
-  { id: 7, name: "Oppo Find X", price: 54000, description: "Premium phone", image: "https://via.placeholder.com/150" },
-  { id: 8, name: "Realme GT", price: 45000, description: "Budget phone", image: "https://via.placeholder.com/150" }
+  { id: 1, name: "iPhone 14", price: 70000, description: "Apple phone", image: "" },
+  { id: 2, name: "Samsung S23", price: 65000, description: "Samsung flagship", image: "" },
+  { id: 3, name: "OnePlus 11", price: 60000, description: "Fast phone", image: "" },
+  { id: 4, name: "Pixel 7", price: 58000, description: "Google phone", image: "" },
+  { id: 5, name: "Xiaomi 13", price: 50000, description: "Value phone", image: "" },
+  { id: 6, name: "Vivo X90", price: 52000, description: "Camera phone", image: "" },
+  { id: 7, name: "Oppo Find X", price: 54000, description: "Premium phone", image: "" },
+  { id: 8, name: "Realme GT", price: 45000, description: "Budget phone", image: "" }
 ];
 
-const ProductList = ({ products }) => (
-  <div className="products-list">
-    {products.map(p => (
-      <div key={p.id}>
-        <Link to={`/products/${p.id}`}>
-          <h3>{p.name}</h3>
-        </Link>
-        <p>₹{p.price}</p>
-      </div>
-    ))}
-  </div>
-);
-
-const ProductDetails = ({ products }) => {
-  const { id } = useParams();
-  const navigate = useNavigate();
-  const product = products.find(p => p.id === Number(id));
-
-  if (!product) return null;
-
+/* ---------- HOME / PRODUCT LIST ---------- */
+const ProductList = ({ products }) => {
   return (
-    <div className="post">
-      <h2>{product.name}</h2>
-      <p>{product.description}</p>
-      <h3>₹{product.price}</h3>
-      <button className="btn" onClick={() => navigate("/")}>Back</button>
-    </div>
-  );
-};
-
-const AdminPanel = ({ products, setProducts }) => {
-  const [form, setForm] = useState({ name: "", description: "", image: "", price: "" });
-
-  const addProduct = () => {
-    setProducts([...products, { ...form, id: Date.now(), price: Number(form.price) }]);
-    setForm({ name: "", description: "", image: "", price: "" });
-  };
-
-  return (
-    <div>
-      <input className="form-control" placeholder="Name" value={form.name}
-        onChange={e => setForm({ ...form, name: e.target.value })} />
-      <input className="form-control" placeholder="Description" value={form.description}
-        onChange={e => setForm({ ...form, description: e.target.value })} />
-      <input className="form-control" placeholder="Image URL" value={form.image}
-        onChange={e => setForm({ ...form, image: e.target.value })} />
-      <input className="form-control" placeholder="Price" value={form.price}
-        onChange={e => setForm({ ...form, price: e.target.value })} />
-
-      <button onClick={addProduct}>Add</button>
-
-      {products.map(p => (
-        <div key={p.id} className="post">
-          <Link to={`/products/${p.id}`}>{p.name}</Link>
-          <button className="float-right" onClick={() =>
-            setProducts(products.map(x => x.id === p.id ? { ...x, price: x.price + 1000 } : x))
-          }>Edit</button>
-          <button className="float-right" onClick={() =>
-            setProducts(products.filter(x => x.id !== p.id))
-          }>Delete</button>
+    <div className="products-list">
+      {products.map((p) => (
+        <div key={p.id}>
+          <Link to={`/products/${p.id}`}>
+            <div className="row">
+              <h3>{p.name}</h3>
+              <p>₹{p.price}</p>
+            </div>
+          </Link>
         </div>
       ))}
     </div>
   );
 };
 
+/* ---------- PRODUCT DETAILS ---------- */
+const ProductDetails = ({ products }) => {
+  const { id } = useParams();
+  const navigate = useNavigate();
+
+  const product = products.find((p) => p.id === Number(id));
+  if (!product) return <div></div>;
+
+  return (
+    <div className="post">
+      <h2>{product.name}</h2>
+      <p>{product.description}</p>
+      <h3>₹{product.price}</h3>
+
+      <button className="btn" onClick={() => navigate("/")}>
+        Back
+      </button>
+    </div>
+  );
+};
+
+/* ---------- ADMIN PANEL ---------- */
+const AdminPanel = ({ products, setProducts }) => {
+  const [form, setForm] = useState({
+    name: "",
+    description: "",
+    image: "",
+    price: ""
+  });
+
+  const addProduct = () => {
+    const newProduct = {
+      id: Date.now(),
+      name: form.name,
+      description: form.description,
+      image: form.image,
+      price: Number(form.price)
+    };
+    setProducts([...products, newProduct]);
+    setForm({ name: "", description: "", image: "", price: "" });
+  };
+
+  const deleteProduct = (id) => {
+    setProducts(products.filter((p) => p.id !== id));
+  };
+
+  const updateProduct = (id) => {
+    setProducts(
+      products.map((p) =>
+        p.id === id ? { ...p, price: p.price + 1000 } : p
+      )
+    );
+  };
+
+  return (
+    <div>
+      <h2>Admin Panel</h2>
+
+      {/* ADD PRODUCT FORM */}
+      <input
+        className="form-control"
+        placeholder="Name"
+        value={form.name}
+        onChange={(e) => setForm({ ...form, name: e.target.value })}
+      />
+      <input
+        className="form-control"
+        placeholder="Description"
+        value={form.description}
+        onChange={(e) => setForm({ ...form, description: e.target.value })}
+      />
+      <input
+        className="form-control"
+        placeholder="Image URL"
+        value={form.image}
+        onChange={(e) => setForm({ ...form, image: e.target.value })}
+      />
+      <input
+        className="form-control"
+        placeholder="Price"
+        value={form.price}
+        onChange={(e) => setForm({ ...form, price: e.target.value })}
+      />
+
+      <button onClick={addProduct}>Add</button>
+
+      {/* ADMIN PRODUCT LIST */}
+      {products.map((p) => (
+        <div className="col-12" key={p.id}>
+          <div>
+            <Link to={`/products/${p.id}`}>
+              {p.name}
+            </Link>
+
+            <button
+              className="float-right"
+              onClick={() => updateProduct(p.id)}
+            >
+              Edit
+            </button>
+
+            <button
+              className="float-right"
+              onClick={() => deleteProduct(p.id)}
+            >
+              Delete
+            </button>
+          </div>
+        </div>
+      ))}
+    </div>
+  );
+};
+
+/* ---------- MAIN APP ---------- */
 const App = () => {
   const [products, setProducts] = useState(initialProducts);
 
@@ -92,8 +160,14 @@ const App = () => {
 
       <Routes>
         <Route path="/" element={<ProductList products={products} />} />
-        <Route path="/products/:id" element={<ProductDetails products={products} />} />
-        <Route path="/admin" element={<AdminPanel products={products} setProducts={setProducts} />} />
+        <Route
+          path="/products/:id"
+          element={<ProductDetails products={products} />}
+        />
+        <Route
+          path="/admin"
+          element={<AdminPanel products={products} setProducts={setProducts} />}
+        />
       </Routes>
     </div>
   );
